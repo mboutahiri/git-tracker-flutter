@@ -28,12 +28,10 @@ class FuelService {
   }
 
   Stream<List<FuelEntry>> watchFuelEntries(String driverId) {
-    return _fuelEntries
-        .where('driverId', isEqualTo: driverId)
-        .snapshots()
-        .map((snapshot) {
+    return _fuelEntries.snapshots().map((snapshot) {
       final entries = snapshot.docs
           .map((doc) => FuelEntry.fromMap(doc.data()))
+          .where((entry) => entry.driverId == driverId)
           .toList();
       entries.sort((a, b) => b.date.compareTo(a.date));
       return entries;
@@ -44,13 +42,13 @@ class FuelService {
     required String driverId,
     required String vehicleId,
   }) {
-    return _fuelEntries
-        .where('driverId', isEqualTo: driverId)
-        .snapshots()
-        .map((snapshot) {
+    return _fuelEntries.snapshots().map((snapshot) {
       final entries = snapshot.docs
           .map((doc) => FuelEntry.fromMap(doc.data()))
-          .where((entry) => entry.vehicleId == vehicleId)
+          .where(
+            (entry) =>
+                entry.driverId == driverId && entry.vehicleId == vehicleId,
+          )
           .toList();
       entries.sort((a, b) => b.date.compareTo(a.date));
       return entries;
@@ -64,13 +62,15 @@ class FuelService {
     final start = DateTime(month.year, month.month);
     final end = DateTime(month.year, month.month + 1);
 
-    return _fuelEntries
-        .where('driverId', isEqualTo: driverId)
-        .snapshots()
-        .map((snapshot) {
+    return _fuelEntries.snapshots().map((snapshot) {
       final entries = snapshot.docs
           .map((doc) => FuelEntry.fromMap(doc.data()))
-          .where((entry) => !entry.date.isBefore(start) && entry.date.isBefore(end))
+          .where(
+            (entry) =>
+                entry.driverId == driverId &&
+                !entry.date.isBefore(start) &&
+                entry.date.isBefore(end),
+          )
           .toList();
       entries.sort((a, b) => b.date.compareTo(a.date));
       return entries;
