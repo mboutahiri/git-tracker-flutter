@@ -27,12 +27,13 @@ class VehicleService {
   Stream<List<Vehicle>> watchVehicles(String driverId) {
     return _vehicles
         .where('driverId', isEqualTo: driverId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Vehicle.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final vehicles = snapshot.docs
+          .map((doc) => Vehicle.fromMap(doc.data()))
+          .toList();
+      vehicles.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return vehicles;
+    });
   }
 }

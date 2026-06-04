@@ -50,25 +50,27 @@ class MaintenanceService {
   Stream<List<MaintenanceCategory>> watchCategories(String driverId) {
     return _categories
         .where('driverId', isEqualTo: driverId)
-        .orderBy('name')
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => MaintenanceCategory.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final categories = snapshot.docs
+          .map((doc) => MaintenanceCategory.fromMap(doc.data()))
+          .toList();
+      categories.sort((a, b) => a.name.compareTo(b.name));
+      return categories;
+    });
   }
 
   Stream<List<Maintenance>> watchMaintenances(String driverId) {
     return _maintenances
         .where('driverId', isEqualTo: driverId)
-        .orderBy('date', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Maintenance.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final maintenances = snapshot.docs
+          .map((doc) => Maintenance.fromMap(doc.data()))
+          .toList();
+      maintenances.sort((a, b) => b.date.compareTo(a.date));
+      return maintenances;
+    });
   }
 
   Stream<List<Maintenance>> watchMaintenancesByVehicle({
@@ -77,14 +79,15 @@ class MaintenanceService {
   }) {
     return _maintenances
         .where('driverId', isEqualTo: driverId)
-        .where('vehicleId', isEqualTo: vehicleId)
-        .orderBy('date', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Maintenance.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final maintenances = snapshot.docs
+          .map((doc) => Maintenance.fromMap(doc.data()))
+          .where((maintenance) => maintenance.vehicleId == vehicleId)
+          .toList();
+      maintenances.sort((a, b) => b.date.compareTo(a.date));
+      return maintenances;
+    });
   }
 
   Stream<List<Maintenance>> watchMaintenancesByVehicleAndDate({
@@ -97,16 +100,18 @@ class MaintenanceService {
 
     return _maintenances
         .where('driverId', isEqualTo: driverId)
-        .where('vehicleId', isEqualTo: vehicleId)
-        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-        .where('date', isLessThan: Timestamp.fromDate(end))
-        .orderBy('date', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Maintenance.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final maintenances = snapshot.docs
+          .map((doc) => Maintenance.fromMap(doc.data()))
+          .where((maintenance) =>
+              maintenance.vehicleId == vehicleId &&
+              !maintenance.date.isBefore(start) &&
+              maintenance.date.isBefore(end))
+          .toList();
+      maintenances.sort((a, b) => b.date.compareTo(a.date));
+      return maintenances;
+    });
   }
 
   Stream<List<Maintenance>> watchMonthlyMaintenances({
@@ -118,14 +123,15 @@ class MaintenanceService {
 
     return _maintenances
         .where('driverId', isEqualTo: driverId)
-        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-        .where('date', isLessThan: Timestamp.fromDate(end))
-        .orderBy('date', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Maintenance.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final maintenances = snapshot.docs
+          .map((doc) => Maintenance.fromMap(doc.data()))
+          .where((maintenance) =>
+              !maintenance.date.isBefore(start) && maintenance.date.isBefore(end))
+          .toList();
+      maintenances.sort((a, b) => b.date.compareTo(a.date));
+      return maintenances;
+    });
   }
 }

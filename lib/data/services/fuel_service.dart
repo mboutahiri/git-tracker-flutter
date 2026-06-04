@@ -30,13 +30,14 @@ class FuelService {
   Stream<List<FuelEntry>> watchFuelEntries(String driverId) {
     return _fuelEntries
         .where('driverId', isEqualTo: driverId)
-        .orderBy('date', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => FuelEntry.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final entries = snapshot.docs
+          .map((doc) => FuelEntry.fromMap(doc.data()))
+          .toList();
+      entries.sort((a, b) => b.date.compareTo(a.date));
+      return entries;
+    });
   }
 
   Stream<List<FuelEntry>> watchFuelEntriesByVehicle({
@@ -45,14 +46,15 @@ class FuelService {
   }) {
     return _fuelEntries
         .where('driverId', isEqualTo: driverId)
-        .where('vehicleId', isEqualTo: vehicleId)
-        .orderBy('date', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => FuelEntry.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final entries = snapshot.docs
+          .map((doc) => FuelEntry.fromMap(doc.data()))
+          .where((entry) => entry.vehicleId == vehicleId)
+          .toList();
+      entries.sort((a, b) => b.date.compareTo(a.date));
+      return entries;
+    });
   }
 
   Stream<List<FuelEntry>> watchMonthlyFuelEntries({
@@ -64,14 +66,14 @@ class FuelService {
 
     return _fuelEntries
         .where('driverId', isEqualTo: driverId)
-        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-        .where('date', isLessThan: Timestamp.fromDate(end))
-        .orderBy('date', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => FuelEntry.fromMap(doc.data()))
-              .toList(),
-        );
+        .map((snapshot) {
+      final entries = snapshot.docs
+          .map((doc) => FuelEntry.fromMap(doc.data()))
+          .where((entry) => !entry.date.isBefore(start) && entry.date.isBefore(end))
+          .toList();
+      entries.sort((a, b) => b.date.compareTo(a.date));
+      return entries;
+    });
   }
 }
