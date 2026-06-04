@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../domain/models/fuel_entry.dart';
 import '../domain/models/maintenance.dart' as domain;
 import '../domain/models/vehicle.dart';
+import '../core/utils/constants.dart';
 import '../providers/auth_provider.dart';
 import '../providers/fuel_provider.dart';
 import '../providers/maintenance_provider.dart';
@@ -39,9 +40,9 @@ class DashboardPage extends StatelessWidget {
 
                 return StreamBuilder<List<FuelEntry>>(
                   stream: context.read<FuelProvider>().watchMonthlyFuelEntries(
-                        driverId: user.uid,
-                        month: month,
-                      ),
+                    driverId: user.uid,
+                    month: month,
+                  ),
                   builder: (context, fuelSnapshot) {
                     final fuelEntries = fuelSnapshot.data ?? [];
                     final totalFuel = fuelEntries.fold<double>(
@@ -80,43 +81,103 @@ class DashboardPage extends StatelessWidget {
                         }
 
                         return ListView(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(
+                            AppConstants.defaultPadding,
+                          ),
                           children: [
-                            Text(
-                              DateFormat.yMMMM().format(month),
-                              style: Theme.of(context).textTheme.titleLarge,
+                            Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: AppConstants.primaryColor,
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.cardRadius,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withAlpha(26),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: const Icon(
+                                      Icons.dashboard,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Monthly overview',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          DateFormat.yMMMM().format(month),
+                                          style: const TextStyle(
+                                            color: Color(0xFFDCEAFF),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 12),
-                            _DashboardCard(
-                              icon: Icons.directions_car,
-                              title: 'Total vehicles',
-                              value: vehicles.length.toString(),
-                            ),
-                            _DashboardCard(
-                              icon: Icons.account_balance_wallet,
-                              title: 'Monthly expenses',
-                              value: '${totalExpenses.toStringAsFixed(2)} DH',
-                            ),
-                            _DashboardCard(
-                              icon: Icons.local_gas_station,
-                              title: 'Monthly gasoil',
-                              value: '${totalFuel.toStringAsFixed(2)} DH',
-                            ),
-                            _DashboardCard(
-                              icon: Icons.build,
-                              title: 'Monthly maintenance',
-                              value:
-                                  '${totalMaintenance.toStringAsFixed(2)} DH',
-                            ),
-                            _DashboardCard(
-                              icon: Icons.pie_chart,
-                              title: 'Expense repartition',
-                              value: '70% gasoil / 30% maintenance',
-                            ),
-                            _DashboardCard(
-                              icon: Icons.water_drop,
-                              title: 'Monthly gasoil consumption',
-                              value: '${totalLitres.toStringAsFixed(2)} L',
+                            const SizedBox(height: 16),
+                            GridView.count(
+                              crossAxisCount:
+                                  MediaQuery.of(context).size.width > 720
+                                  ? 3
+                                  : 2,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 1.25,
+                              children: [
+                                _DashboardCard(
+                                  icon: Icons.directions_car,
+                                  title: 'Vehicles',
+                                  value: vehicles.length.toString(),
+                                ),
+                                _DashboardCard(
+                                  icon: Icons.account_balance_wallet,
+                                  title: 'Expenses',
+                                  value:
+                                      '${totalExpenses.toStringAsFixed(2)} DH',
+                                ),
+                                _DashboardCard(
+                                  icon: Icons.local_gas_station,
+                                  title: 'Gasoil',
+                                  value: '${totalFuel.toStringAsFixed(2)} DH',
+                                ),
+                                _DashboardCard(
+                                  icon: Icons.build,
+                                  title: 'Maintenance',
+                                  value:
+                                      '${totalMaintenance.toStringAsFixed(2)} DH',
+                                ),
+                                const _DashboardCard(
+                                  icon: Icons.pie_chart,
+                                  title: 'Repartition',
+                                  value: '70% / 30%',
+                                ),
+                                _DashboardCard(
+                                  icon: Icons.water_drop,
+                                  title: 'Consumption',
+                                  value: '${totalLitres.toStringAsFixed(2)} L',
+                                ),
+                              ],
                             ),
                           ],
                         );
@@ -144,13 +205,37 @@ class _DashboardCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
-        title: Text(title),
-        subtitle: Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppConstants.lightBlueColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: AppConstants.primaryColor),
+            ),
+            const Spacer(),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: AppConstants.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: AppConstants.mutedTextColor),
+            ),
+          ],
         ),
       ),
     );

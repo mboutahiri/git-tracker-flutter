@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../core/utils/constants.dart';
 import '../domain/models/maintenance.dart' as domain;
 import '../domain/models/maintenance_category.dart';
 import '../domain/models/vehicle.dart';
@@ -112,7 +113,8 @@ class _MaintenancePageState extends State<MaintenancePage> {
           : StreamBuilder<List<Vehicle>>(
               stream: context.read<VehicleProvider>().watchVehicles(user.uid),
               builder: (context, vehicleSnapshot) {
-                if (vehicleSnapshot.connectionState == ConnectionState.waiting) {
+                if (vehicleSnapshot.connectionState ==
+                    ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
@@ -125,127 +127,161 @@ class _MaintenancePageState extends State<MaintenancePage> {
 
                 final selectedVehicleId =
                     vehicles.any((v) => v.id == _selectedVehicleId)
-                        ? _selectedVehicleId!
-                        : vehicles.first.id;
+                    ? _selectedVehicleId!
+                    : vehicles.first.id;
 
                 return StreamBuilder<List<MaintenanceCategory>>(
-                  stream: context
-                      .read<MaintenanceProvider>()
-                      .watchCategories(user.uid),
+                  stream: context.read<MaintenanceProvider>().watchCategories(
+                    user.uid,
+                  ),
                   builder: (context, categorySnapshot) {
                     final categories = categorySnapshot.data ?? [];
                     final selectedCategory =
                         categories.any((c) => c.name == _selectedCategory)
-                            ? _selectedCategory
-                            : null;
+                        ? _selectedCategory
+                        : null;
 
                     return ListView(
-                      padding: const EdgeInsets.all(16),
-                        children: [
-                          DropdownButtonFormField<String>(
-                            initialValue: selectedVehicleId,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Vehicle',
-                            ),
-                            items: vehicles
-                                .map(
-                                  (vehicle) => DropdownMenuItem(
-                                    value: vehicle.id,
-                                    child: Text(
-                                      '${vehicle.name} (${vehicle.matricule})',
+                      padding: const EdgeInsets.all(
+                        AppConstants.defaultPadding,
+                      ),
+                      children: [
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: AppConstants.lightBlueColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                        Icons.build,
+                                        color: AppConstants.primaryColor,
+                                      ),
                                     ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'New maintenance',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                DropdownButtonFormField<String>(
+                                  initialValue: selectedVehicleId,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Vehicle',
+                                    prefixIcon: Icon(Icons.directions_car),
                                   ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedVehicleId = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          DropdownButtonFormField<String>(
-                            initialValue: selectedCategory,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Choose category',
-                            ),
-                            items: categories
-                                .map(
-                                  (category) => DropdownMenuItem(
-                                    value: category.name,
-                                    child: Text(category.name),
+                                  items: vehicles
+                                      .map(
+                                        (vehicle) => DropdownMenuItem(
+                                          value: vehicle.id,
+                                          child: Text(
+                                            '${vehicle.name} (${vehicle.matricule})',
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedVehicleId = value;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                DropdownButtonFormField<String>(
+                                  initialValue: selectedCategory,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Choose category',
+                                    prefixIcon: Icon(Icons.category),
                                   ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedCategory = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: _categoryController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Or type a new category',
-                              prefixIcon: Icon(Icons.category),
+                                  items: categories
+                                      .map(
+                                        (category) => DropdownMenuItem(
+                                          value: category.name,
+                                          child: Text(category.name),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedCategory = value;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _categoryController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Or type a new category',
+                                    prefixIcon: Icon(Icons.edit),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _amountController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Amount',
+                                    prefixIcon: Icon(Icons.payments),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _descriptionController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Description',
+                                    prefixIcon: Icon(Icons.description),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: const Icon(Icons.calendar_month),
+                                  title: Text(
+                                    DateFormat.yMMMMd().format(_selectedDate),
+                                  ),
+                                  trailing: OutlinedButton(
+                                    onPressed: _pickDate,
+                                    child: const Text('Choose'),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () => _addMaintenance(
+                                      driverId: user.uid,
+                                      vehicleId: selectedVehicleId,
+                                      categories: categories,
+                                    ),
+                                    icon: const Icon(Icons.save),
+                                    label: const Text('Save maintenance'),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: _amountController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Amount',
-                              prefixIcon: Icon(Icons.payments),
-                            ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 340,
+                          child: _MaintenanceList(
+                            driverId: user.uid,
+                            vehicleId: selectedVehicleId,
                           ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: _descriptionController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Description',
-                              prefixIcon: Icon(Icons.description),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.calendar_month),
-                            title: Text(
-                              DateFormat.yMMMMd().format(_selectedDate),
-                            ),
-                            trailing: ElevatedButton(
-                              onPressed: _pickDate,
-                              child: const Text('Choose date'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () => _addMaintenance(
-                                driverId: user.uid,
-                                vehicleId: selectedVehicleId,
-                                categories: categories,
-                              ),
-                              icon: const Icon(Icons.save),
-                              label: const Text('Save maintenance'),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            height: 320,
-                            child: _MaintenanceList(
-                              driverId: user.uid,
-                              vehicleId: selectedVehicleId,
-                            ),
-                          ),
-                        ],
+                        ),
+                      ],
                     );
                   },
                 );
@@ -259,18 +295,15 @@ class _MaintenanceList extends StatelessWidget {
   final String driverId;
   final String vehicleId;
 
-  const _MaintenanceList({
-    required this.driverId,
-    required this.vehicleId,
-  });
+  const _MaintenanceList({required this.driverId, required this.vehicleId});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<domain.Maintenance>>(
       stream: context.read<MaintenanceProvider>().watchMaintenancesByVehicle(
-            driverId: driverId,
-            vehicleId: vehicleId,
-          ),
+        driverId: driverId,
+        vehicleId: vehicleId,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -291,14 +324,33 @@ class _MaintenanceList extends StatelessWidget {
             final maintenance = maintenances[index];
             return Card(
               child: ListTile(
-                leading: const Icon(Icons.build),
-                title: Text(maintenance.category),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: AppConstants.lightBlueColor,
+                  child: const Icon(
+                    Icons.build,
+                    color: AppConstants.primaryColor,
+                  ),
+                ),
+                title: Text(
+                  maintenance.category,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
                 subtitle: Text(
                   '${maintenance.description}\n'
                   '${DateFormat.yMMMMd().format(maintenance.date)}',
                 ),
                 isThreeLine: true,
-                trailing: Text('${maintenance.amount.toStringAsFixed(2)} DH'),
+                trailing: Text(
+                  '${maintenance.amount.toStringAsFixed(2)} DH',
+                  style: const TextStyle(
+                    color: AppConstants.primaryColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             );
           },

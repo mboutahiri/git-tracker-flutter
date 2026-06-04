@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../core/utils/constants.dart';
 import '../domain/models/vehicle.dart';
 import '../providers/auth_provider.dart';
 import '../providers/vehicle_provider.dart';
@@ -37,10 +38,10 @@ class _VehiclePageState extends State<VehiclePage> {
     }
 
     await context.read<VehicleProvider>().addVehicle(
-          driverId: driverId,
-          name: name,
-          matricule: matricule,
-        );
+      driverId: driverId,
+      name: name,
+      matricule: matricule,
+    );
 
     if (!mounted) return;
     _nameController.clear();
@@ -56,41 +57,70 @@ class _VehiclePageState extends State<VehiclePage> {
       body: user == null
           ? const Center(child: Text('Please login first'))
           : Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
               child: Column(
                 children: [
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Vehicle name',
-                      prefixIcon: Icon(Icons.directions_car),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _matriculeController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Matricule',
-                      prefixIcon: Icon(Icons.confirmation_number),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _addVehicle(user.uid),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add vehicle'),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppConstants.lightBlueColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.directions_car,
+                                  color: AppConstants.primaryColor,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Add vehicle',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Vehicle name',
+                              prefixIcon: Icon(Icons.directions_car),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _matriculeController,
+                            decoration: const InputDecoration(
+                              labelText: 'Matricule',
+                              prefixIcon: Icon(Icons.confirmation_number),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () => _addVehicle(user.uid),
+                              icon: const Icon(Icons.add),
+                              label: const Text('Add vehicle'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   Expanded(
                     child: StreamBuilder<List<Vehicle>>(
-                      stream: context
-                          .read<VehicleProvider>()
-                          .watchVehicles(user.uid),
+                      stream: context.read<VehicleProvider>().watchVehicles(
+                        user.uid,
+                      ),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -100,7 +130,9 @@ class _VehiclePageState extends State<VehiclePage> {
                         }
 
                         if (snapshot.hasError) {
-                          return Center(child: Text('Error: ${snapshot.error}'));
+                          return Center(
+                            child: Text('Error: ${snapshot.error}'),
+                          );
                         }
 
                         final vehicles = snapshot.data ?? [];
@@ -112,15 +144,33 @@ class _VehiclePageState extends State<VehiclePage> {
 
                         return ListView.separated(
                           itemCount: vehicles.length,
-                          separatorBuilder: (_, _) => const Divider(),
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 10),
                           itemBuilder: (context, index) {
                             final vehicle = vehicles[index];
-                            return ListTile(
-                              leading: const Icon(Icons.directions_car),
-                              title: Text(vehicle.name),
-                              subtitle: Text(
-                                '${vehicle.matricule} - '
-                                '${DateFormat.yMd().format(vehicle.createdAt)}',
+                            return Card(
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                leading: CircleAvatar(
+                                  backgroundColor: AppConstants.lightBlueColor,
+                                  child: const Icon(
+                                    Icons.directions_car,
+                                    color: AppConstants.primaryColor,
+                                  ),
+                                ),
+                                title: Text(
+                                  vehicle.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  '${vehicle.matricule} - '
+                                  '${DateFormat.yMd().format(vehicle.createdAt)}',
+                                ),
                               ),
                             );
                           },

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../core/utils/constants.dart';
 import '../domain/models/maintenance.dart' as domain;
 import '../domain/models/vehicle.dart';
 import '../providers/auth_provider.dart';
@@ -46,7 +47,8 @@ class _HistoryPageState extends State<HistoryPage> {
           : StreamBuilder<List<Vehicle>>(
               stream: context.read<VehicleProvider>().watchVehicles(user.uid),
               builder: (context, vehicleSnapshot) {
-                if (vehicleSnapshot.connectionState == ConnectionState.waiting) {
+                if (vehicleSnapshot.connectionState ==
+                    ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
@@ -59,63 +61,97 @@ class _HistoryPageState extends State<HistoryPage> {
 
                 final selectedVehicleId =
                     vehicles.any((v) => v.id == _selectedVehicleId)
-                        ? _selectedVehicleId!
-                        : vehicles.first.id;
+                    ? _selectedVehicleId!
+                    : vehicles.first.id;
 
                 return Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppConstants.defaultPadding),
                   child: Column(
                     children: [
-                      DropdownButtonFormField<String>(
-                        initialValue: selectedVehicleId,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Vehicle',
-                        ),
-                        items: vehicles
-                            .map(
-                              (vehicle) => DropdownMenuItem(
-                                value: vehicle.id,
-                                child: Text(
-                                  '${vehicle.name} (${vehicle.matricule})',
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: AppConstants.lightBlueColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.history,
+                                      color: AppConstants.primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Maintenance filters',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w800),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              DropdownButtonFormField<String>(
+                                initialValue: selectedVehicleId,
+                                decoration: const InputDecoration(
+                                  labelText: 'Vehicle',
+                                  prefixIcon: Icon(Icons.directions_car),
                                 ),
+                                items: vehicles
+                                    .map(
+                                      (vehicle) => DropdownMenuItem(
+                                        value: vehicle.id,
+                                        child: Text(
+                                          '${vehicle.name} (${vehicle.matricule})',
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedVehicleId = value;
+                                  });
+                                },
                               ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedVehicleId = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _pickDate,
-                              icon: const Icon(Icons.calendar_month),
-                              label: Text(
-                                _selectedDate == null
-                                    ? 'Filter by date'
-                                    : DateFormat.yMMMMd()
-                                        .format(_selectedDate!),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      onPressed: _pickDate,
+                                      icon: const Icon(Icons.calendar_month),
+                                      label: Text(
+                                        _selectedDate == null
+                                            ? 'Filter by date'
+                                            : DateFormat.yMMMd().format(
+                                                _selectedDate!,
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton.filledTonal(
+                                    tooltip: 'Clear date filter',
+                                    onPressed: _selectedDate == null
+                                        ? null
+                                        : () {
+                                            setState(() {
+                                              _selectedDate = null;
+                                            });
+                                          },
+                                    icon: const Icon(Icons.clear),
+                                  ),
+                                ],
                               ),
-                            ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            tooltip: 'Clear date filter',
-                            onPressed: _selectedDate == null
-                                ? null
-                                : () {
-                                    setState(() {
-                                      _selectedDate = null;
-                                    });
-                                  },
-                            icon: const Icon(Icons.clear),
-                          ),
-                        ],
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Expanded(
@@ -175,20 +211,40 @@ class _HistoryList extends StatelessWidget {
           return const Center(child: Text('No maintenance history found'));
         }
 
-        return ListView.builder(
+        return ListView.separated(
           itemCount: items.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             final maintenance = items[index];
             return Card(
               child: ListTile(
-                leading: const Icon(Icons.history),
-                title: Text(maintenance.category),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: AppConstants.lightBlueColor,
+                  child: const Icon(
+                    Icons.history,
+                    color: AppConstants.primaryColor,
+                  ),
+                ),
+                title: Text(
+                  maintenance.category,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
                 subtitle: Text(
                   '${maintenance.description}\n'
                   '${DateFormat.yMMMMd().format(maintenance.date)}',
                 ),
                 isThreeLine: true,
-                trailing: Text('${maintenance.amount.toStringAsFixed(2)} DH'),
+                trailing: Text(
+                  '${maintenance.amount.toStringAsFixed(2)} DH',
+                  style: const TextStyle(
+                    color: AppConstants.primaryColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             );
           },

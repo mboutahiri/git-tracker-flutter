@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/utils/constants.dart';
 import 'dashboard_page.dart';
 import 'fuel_page.dart';
 import 'history_page.dart';
@@ -31,6 +32,9 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
+        selectedItemColor: AppConstants.primaryColor,
+        unselectedItemColor: AppConstants.mutedTextColor,
+        showUnselectedLabels: true,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
@@ -53,10 +57,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.build),
             label: 'Maintenance',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
         ],
       ),
     );

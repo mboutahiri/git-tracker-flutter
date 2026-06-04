@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../core/utils/constants.dart';
 import '../domain/models/fuel_entry.dart';
 import '../domain/models/vehicle.dart';
 import '../providers/auth_provider.dart';
@@ -57,18 +58,20 @@ class _FuelPageState extends State<FuelPage> {
 
     if (litres == null || amount == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Litres and amount must be valid numbers')),
+        const SnackBar(
+          content: Text('Litres and amount must be valid numbers'),
+        ),
       );
       return;
     }
 
     await context.read<FuelProvider>().addFuelEntry(
-          driverId: driverId,
-          vehicleId: vehicleId,
-          litres: litres,
-          amount: amount,
-          date: _selectedDate,
-        );
+      driverId: driverId,
+      vehicleId: vehicleId,
+      litres: litres,
+      amount: amount,
+      date: _selectedDate,
+    );
 
     if (!mounted) return;
     _litresController.clear();
@@ -89,7 +92,8 @@ class _FuelPageState extends State<FuelPage> {
           : StreamBuilder<List<Vehicle>>(
               stream: context.read<VehicleProvider>().watchVehicles(user.uid),
               builder: (context, vehicleSnapshot) {
-                if (vehicleSnapshot.connectionState == ConnectionState.waiting) {
+                if (vehicleSnapshot.connectionState ==
+                    ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
@@ -102,74 +106,107 @@ class _FuelPageState extends State<FuelPage> {
 
                 final selectedVehicleId =
                     vehicles.any((v) => v.id == _selectedVehicleId)
-                        ? _selectedVehicleId!
-                        : vehicles.first.id;
+                    ? _selectedVehicleId!
+                    : vehicles.first.id;
 
                 return Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppConstants.defaultPadding),
                   child: Column(
                     children: [
-                      DropdownButtonFormField<String>(
-                        initialValue: selectedVehicleId,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Vehicle',
-                        ),
-                        items: vehicles
-                            .map(
-                              (vehicle) => DropdownMenuItem(
-                                value: vehicle.id,
-                                child: Text(
-                                  '${vehicle.name} (${vehicle.matricule})',
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: AppConstants.lightBlueColor,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.local_gas_station,
+                                      color: AppConstants.primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'New fuel entry',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w800),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              DropdownButtonFormField<String>(
+                                initialValue: selectedVehicleId,
+                                decoration: const InputDecoration(
+                                  labelText: 'Vehicle',
+                                  prefixIcon: Icon(Icons.directions_car),
+                                ),
+                                items: vehicles
+                                    .map(
+                                      (vehicle) => DropdownMenuItem(
+                                        value: vehicle.id,
+                                        child: Text(
+                                          '${vehicle.name} (${vehicle.matricule})',
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedVehicleId = value;
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: _litresController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Litres',
+                                  prefixIcon: Icon(Icons.water_drop),
                                 ),
                               ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedVehicleId = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: _litresController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Litres',
-                          prefixIcon: Icon(Icons.water_drop),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: _amountController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Amount',
-                          prefixIcon: Icon(Icons.payments),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.calendar_month),
-                        title: Text(DateFormat.yMMMMd().format(_selectedDate)),
-                        trailing: ElevatedButton(
-                          onPressed: _pickDate,
-                          child: const Text('Choose date'),
-                        ),
-                      ),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () => _addFuelEntry(
-                            driverId: user.uid,
-                            vehicleId: selectedVehicleId,
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: _amountController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Amount',
+                                  prefixIcon: Icon(Icons.payments),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: const Icon(Icons.calendar_month),
+                                title: Text(
+                                  DateFormat.yMMMMd().format(_selectedDate),
+                                ),
+                                trailing: OutlinedButton(
+                                  onPressed: _pickDate,
+                                  child: const Text('Choose'),
+                                ),
+                              ),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _addFuelEntry(
+                                    driverId: user.uid,
+                                    vehicleId: selectedVehicleId,
+                                  ),
+                                  icon: const Icon(Icons.save),
+                                  label: const Text('Save fuel entry'),
+                                ),
+                              ),
+                            ],
                           ),
-                          icon: const Icon(Icons.save),
-                          label: const Text('Save fuel entry'),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -192,18 +229,15 @@ class _FuelEntryList extends StatelessWidget {
   final String driverId;
   final String vehicleId;
 
-  const _FuelEntryList({
-    required this.driverId,
-    required this.vehicleId,
-  });
+  const _FuelEntryList({required this.driverId, required this.vehicleId});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<FuelEntry>>(
       stream: context.read<FuelProvider>().watchFuelEntriesByVehicle(
-            driverId: driverId,
-            vehicleId: vehicleId,
-          ),
+        driverId: driverId,
+        vehicleId: vehicleId,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -224,10 +258,29 @@ class _FuelEntryList extends StatelessWidget {
             final entry = entries[index];
             return Card(
               child: ListTile(
-                leading: const Icon(Icons.local_gas_station),
-                title: Text('${entry.litres.toStringAsFixed(2)} L'),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: AppConstants.lightBlueColor,
+                  child: const Icon(
+                    Icons.local_gas_station,
+                    color: AppConstants.primaryColor,
+                  ),
+                ),
+                title: Text(
+                  '${entry.litres.toStringAsFixed(2)} L',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
                 subtitle: Text(DateFormat.yMMMMd().format(entry.date)),
-                trailing: Text('${entry.amount.toStringAsFixed(2)} DH'),
+                trailing: Text(
+                  '${entry.amount.toStringAsFixed(2)} DH',
+                  style: const TextStyle(
+                    color: AppConstants.primaryColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             );
           },

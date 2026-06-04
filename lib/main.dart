@@ -14,9 +14,7 @@ import 'providers/vehicle_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const GitTrackerApp());
 }
 
@@ -38,11 +36,86 @@ class GitTrackerApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: AppConstants.primaryColor,
+            primary: AppConstants.primaryColor,
+            secondary: AppConstants.secondaryColor,
+            surface: AppConstants.surfaceColor,
           ),
+          scaffoldBackgroundColor: AppConstants.backgroundColor,
           appBarTheme: const AppBarTheme(
             centerTitle: true,
             backgroundColor: AppConstants.primaryColor,
             foregroundColor: Colors.white,
+            elevation: 0,
+            titleTextStyle: TextStyle(
+              color: Colors.white,
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          cardTheme: CardThemeData(
+            color: AppConstants.surfaceColor,
+            elevation: 2,
+            shadowColor: Colors.black.withAlpha(18),
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFD8DEE9)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFD8DEE9)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                color: AppConstants.secondaryColor,
+                width: 1.5,
+              ),
+            ),
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppConstants.primaryColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppConstants.primaryColor,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: const BorderSide(color: Color(0xFFD8DEE9)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            backgroundColor: Colors.white,
+            selectedItemColor: AppConstants.primaryColor,
+            unselectedItemColor: AppConstants.mutedTextColor,
+            selectedLabelStyle: TextStyle(fontWeight: FontWeight.w700),
+            type: BottomNavigationBarType.fixed,
+            elevation: 12,
           ),
           useMaterial3: true,
         ),
