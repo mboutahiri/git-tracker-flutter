@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "825780277144",
+    "project_id": "trackerflutter-8cda3",
+    "storage_bucket": "trackerflutter-8cda3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:825780277144:android:ea4892a81ed708829e25ed",
+        "android_client_info": {
+          "package_name": "ma.esisa.git_tracker_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr2_7YmcyTQKNHoZdzQM8v9kph_x4RkSw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
